@@ -14,7 +14,6 @@ type PossibleTestInput = {
   blue?: number;
 };
 
-// Using this as a "input"
 const possibleTest: PossibleTestInput = {
   red: 12,
   green: 13,
@@ -34,7 +33,7 @@ async function solution() {
 
   const gameInfos: GameInfo[] = [];
 
-  readInterface.on("line", function (line) {
+  readInterface.on("line", (line) => {
     // For each game, evaluate the subsets
     // Lines are in format: "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
 
@@ -49,22 +48,19 @@ async function solution() {
     const gameId = matches?.groups?.gameId;
     if (!gameId) throw new Error("No game ID found");
 
-    // For each subset, get the count of red, green, and blue that is required.
-    // Initialize the game info with 0 for each color and then increase the count if it's higher than the current count
     let gameInfo: GameInfo = {
       id: gameId,
       requiredRed: 0,
       requiredGreen: 0,
       requiredBlue: 0,
     };
+    // For each subset, get the count of red, green, and blue
 
     const subsetRegex = /(?<count>\d+)\s+(?<color>red|green|blue)/; // Run this on the comma split element of each subset
 
-    // For each subset, get the count of red, green, and blue
     subsets?.forEach((subset) => {
       const coloredCubeGroups = subset.split(",").map((cube) => cube.trim());
 
-      // For each colored cube group, get the color and count
       coloredCubeGroups.forEach((group) => {
         const match = subsetRegex.exec(group);
         const [color, count] = [match?.groups?.color, match?.groups?.count];
@@ -79,7 +75,6 @@ async function solution() {
           throw new Error("Count is not a number");
         }
 
-        // If the count is higher than the current count, update the count
         switch (color) {
           case "red": {
             gameInfo.requiredRed =
@@ -103,8 +98,6 @@ async function solution() {
             return;
           }
 
-          // If new colors were introduced, we could just add them here
-
           default: {
             throw new Error("Invalid color");
           }
@@ -116,39 +109,13 @@ async function solution() {
   });
 
   readInterface.on("close", () => {
-    // Filter out games that don't have enough cubes
-    const possibleGames = gameInfos.filter((gameInfo) => {
-      const enoughRed =
-        typeof possibleTest.red === "undefined" ||
-        gameInfo.requiredRed <= possibleTest.red;
-
-      const enoughGreen =
-        typeof possibleTest.green === "undefined" ||
-        gameInfo.requiredGreen <= possibleTest.green;
-
-      const enoughBlue =
-        typeof possibleTest.blue === "undefined" ||
-        gameInfo.requiredBlue <= possibleTest.blue;
-
-      if (!enoughRed)
-        console.log(`Not enough red cubes for game ${gameInfo.id}`);
-      else if (!enoughGreen)
-        console.log(`Not enough green cubes for game ${gameInfo.id}`);
-      else if (!enoughBlue)
-        console.log(`Not enough blue cubes for game ${gameInfo.id}`);
-      return enoughRed && enoughGreen && enoughBlue;
-    });
-
-    console.log(
-      "Possible game ids: ",
-      possibleGames.map((g) => g.id)
-    );
-
-    const sum = possibleGames.reduce((acc, game) => {
-      return acc + parseInt(game.id);
+    // Now we have to find the sum of the powers of each game. We already have the minimum required for each color from the last part,
+    // so we just have to multiply them together
+    const sum = gameInfos.reduce((acc, game) => {
+      return acc + game.requiredRed * game.requiredGreen * game.requiredBlue;
     }, 0);
 
-    console.log("SUM: ", sum);
+    console.log("Sum of Powers: ", sum);
   });
 }
 
