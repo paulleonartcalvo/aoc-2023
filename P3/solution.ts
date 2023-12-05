@@ -75,14 +75,6 @@ async function solution() {
         .map((number) => parseInt(number.content))
         .reduce((a, b) => a + b, 0)
     );
-
-    // numbers.slice(0, 10).map((number) => {
-    //   console.log("NUMBER: ", number);
-    //   console.log(
-    //     "ADJACENT SYMBOLS: ",
-    //     getAdjacentSymbols(number, symbols).map((s) => s)
-    //   );
-    // });
   });
 }
 

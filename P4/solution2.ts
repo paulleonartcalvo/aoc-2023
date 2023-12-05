@@ -6,6 +6,25 @@ type Card = {
   foundNumbers: number[];
   winningNumbers: Record<string, boolean>;
 };
+
+function getWonCopies(card: Card) {
+  const numMatchingNumbers = card.foundNumbers.filter(
+    (n) => card.winningNumbers[n]
+  ).length;
+
+  const copies = [];
+
+  for (
+    let i = card.cardNumber + 1;
+    i <= card.cardNumber + numMatchingNumbers;
+    i++
+  ) {
+    copies.push(i);
+  }
+
+  return copies;
+}
+
 async function solution() {
   const inputFileName = "input.txt";
 
@@ -16,7 +35,7 @@ async function solution() {
     terminal: false,
   });
 
-  let cards: Card[] = [];
+  let cards: Record<string, Card> = {};
 
   readInterface.on("line", function (line) {
     const regex = /Card\s+(?<cardNumber>\d+):\s+(?<numberSets>.*)/g;
@@ -38,28 +57,48 @@ async function solution() {
       .split("|")
       .map((set) => set.trim().split(/\s+/));
 
-    cards.push({
+    cards[cardNumber] = {
       cardNumber: parseInt(cardNumber),
       foundNumbers: revealedNumbers.map((num) => parseInt(num)),
       winningNumbers: winningNumbers.reduce(
         (acc, curr) => ({ ...acc, [curr]: true }),
         {}
       ),
-    });
+    };
   });
 
   readInterface.on("close", () => {
-    const cardValues = cards.map((card) => {
-      const matchingNumbers = card.foundNumbers.filter(
-        (n) => card.winningNumbers[n]
-      );
+    let cardMap: Record<string, Card[]> = Object.values(cards).reduce(
+      (curr, acc) => {
+        return { ...curr, [acc.cardNumber]: [acc] };
+      },
+      {}
+    );
 
-      if (matchingNumbers.length === 0) return 0;
+    let currCardNumber = 1;
 
-      return Math.pow(2, matchingNumbers.length - 1);
-    });
+    while (currCardNumber <= Object.keys(cards).length) {
+      const cardsOfThisNumber = cardMap[currCardNumber];
+      for (const card of cardsOfThisNumber) {
+        const wonCopies = getWonCopies(card);
 
-    console.log(cardValues.reduce((acc, curr) => acc + curr, 0));
+        for (const copy of wonCopies) {
+          if (typeof cardMap[copy] === "undefined") {
+            cardMap[copy] = [];
+          }
+
+          cardMap[copy].push(cards[copy]);
+        }
+      }
+
+      currCardNumber++;
+    }
+
+    const totalCards = Object.values(cardMap).reduce(
+      (acc, curr) => acc + curr.length,
+      0
+    );
+    console.log(totalCards);
   });
 }
 
