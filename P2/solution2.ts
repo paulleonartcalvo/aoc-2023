@@ -19,9 +19,7 @@ const possibleTest: PossibleTestInput = {
   green: 13,
   blue: 14,
 };
-/**
- * Now we have to account for matches of "one", "two", etc on the line.
- */
+
 async function solution() {
   const inputFileName = "input.txt";
 
