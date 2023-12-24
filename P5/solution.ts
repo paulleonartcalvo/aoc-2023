@@ -61,6 +61,25 @@ async function solution() {
       console.log(`${seedNumbers.length} seed numbers`);
       console.log(seedNumbers);
     } else {
+      if (line.endsWith("map:")) {
+        console.log("Map title line");
+        const sourceDestRegex = /(?<sourceName>.+)-to-(?<destName>.+)\smap:/;
+
+        const { sourceName, destName } =
+          sourceDestRegex.exec(line)?.groups ?? {};
+        if (
+          typeof sourceName === "undefined" ||
+          typeof destName === "undefined"
+        ) {
+          console.log(line);
+          throw new Error("Source or destination name is undefined");
+        }
+
+        console.log(`Source: ${sourceName}, Destination: ${destName}`);
+      } else {
+      }
+
+      console.log;
     }
 
     lineIndex++;
